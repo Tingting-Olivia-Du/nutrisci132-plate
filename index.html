@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Seat at Every Table — MyPlate &amp; Cultural Cuisine Virtual Gallery</title>
+<meta name="author" content="Tingting Du">
+<meta name="description" content="A virtual gallery mapping Korean, Nigerian, and Mexican traditional meals onto the five MyPlate food groups. NUTR SCI 132: Nutrition Today, Fall 2026, University of Wisconsin-Madison.">
+<style>
+  :root{
+    --fruit:#D34E4A;
+    --veg:#5C9B3E;
+    --grain:#E0922F;
+    --protein:#8B4E8F;
+    --dairy:#1B7FC4;
+    --ink:#241d17;
+    --muted:#6d6257;
+    --paper:#fbf7f0;
+    --card:#ffffff;
+    --line:#e6ddd0;
+    --shadow:0 1px 2px rgba(36,29,23,.06),0 10px 30px rgba(36,29,23,.08);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font:16px/1.65 "Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .sans{font-family:"Inter","Segoe UI",system-ui,-apple-system,Helvetica,Arial,sans-serif}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+
+  /* ---------- nav ---------- */
+  nav{
+    position:sticky;top:0;z-index:50;
+    background:rgba(251,247,240,.92);
+    backdrop-filter:saturate(1.4) blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  nav .wrap{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding-top:10px;padding-bottom:10px}
+  nav .brand{font-weight:700;letter-spacing:.02em;margin-right:auto;font-size:15px}
+  nav a{
+    font-family:"Inter","Segoe UI",system-ui,sans-serif;
+    font-size:13px;text-decoration:none;color:var(--muted);
+    padding:6px 11px;border-radius:999px;white-space:nowrap;
+  }
+  nav a:hover{background:#efe7da;color:var(--ink)}
+
+  /* ---------- hero ---------- */
+  header.hero{
+    padding:76px 0 56px;
+    background:
+      radial-gradient(1100px 420px at 12% -12%, #fde8d8 0%, transparent 60%),
+      radial-gradient(900px 400px at 92% 0%, #e2f0d9 0%, transparent 62%);
+    border-bottom:1px solid var(--line);
+  }
+  .kicker{
+    font-family:"Inter",system-ui,sans-serif;font-size:12px;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--muted);margin-bottom:18px;
+  }
+  h1{font-size:clamp(2.2rem,6vw,4rem);line-height:1.04;margin:0 0 20px;letter-spacing:-.02em}
+  h1 em{font-style:italic;color:var(--grain)}
+  .lede{font-size:clamp(1.05rem,2.2vw,1.3rem);max-width:60ch;color:#4a4038;margin:0 0 28px}
+  .byline{font-family:"Inter",system-ui,sans-serif;font-size:13px;color:var(--muted)}
+  .byline b{color:var(--ink)}
+
+  /* ---------- sections ---------- */
+  section{padding:68px 0;border-bottom:1px solid var(--line)}
+  h2{font-size:clamp(1.6rem,3.6vw,2.3rem);margin:0 0 8px;letter-spacing:-.015em}
+  h3{font-size:1.15rem;margin:0 0 8px}
+  .sub{color:var(--muted);margin:0 0 32px;max-width:65ch}
+  p{margin:0 0 14px}
+
+  /* ---------- legend / key ---------- */
+  .keygrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-top:26px}
+  .keycard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow)}
+  .keycard .dot{width:14px;height:14px;border-radius:50%;display:inline-block;margin-right:8px;vertical-align:-1px}
+  .keycard h4{margin:0 0 6px;font-size:.95rem}
+  .keycard p{font-family:"Inter",system-ui,sans-serif;font-size:12.5px;color:var(--muted);margin:0;line-height:1.5}
+
+  /* ---------- plate diagram ---------- */
+  .plate-row{display:grid;grid-template-columns:300px 1fr;gap:40px;align-items:center;margin-top:34px}
+  @media(max-width:760px){.plate-row{grid-template-columns:1fr}}
+  .plate{
+    position:relative;width:270px;height:270px;border-radius:50%;
+    /* matches the real MyPlate layout: fruits upper-left, vegetables lower-left,
+       grains upper-right, protein lower-right (conic starts at 12 o'clock, clockwise) */
+    background:conic-gradient(
+      var(--grain) 0turn .30turn,
+      var(--protein) .30turn .50turn,
+      var(--veg) .50turn .80turn,
+      var(--fruit) .80turn 1turn
+    );
+    box-shadow:0 0 0 9px #fff,0 0 0 11px var(--line),0 16px 38px rgba(36,29,23,.16);
+  }
+  .plate span{
+    position:absolute;color:#fff;font-family:"Inter",system-ui,sans-serif;
+    font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    text-shadow:0 1px 3px rgba(0,0,0,.3);
+  }
+  .plate .s-fruit{top:25%;left:17%}
+  .plate .s-veg{bottom:25%;left:13%}
+  .plate .s-grain{top:26%;right:16%}
+  .plate .s-protein{bottom:26%;right:14%}
+  .cup{
+    position:absolute;top:-22px;right:-46px;width:78px;height:78px;border-radius:50%;
+    background:var(--dairy);box-shadow:0 0 0 7px #fff,0 0 0 9px var(--line);
+    display:grid;place-items:center;color:#fff;
+    font-family:"Inter",system-ui,sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.06em;
+  }
+
+  /* ---------- filter chips ---------- */
+  .filters{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 30px}
+  .filters button{
+    font-family:"Inter",system-ui,sans-serif;font-size:12.5px;font-weight:600;
+    border:1px solid var(--line);background:#fff;color:var(--muted);
+    padding:8px 15px;border-radius:999px;cursor:pointer;transition:.18s;
+  }
+  .filters button:hover{border-color:#cdbfa9}
+  .filters button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+  /* ---------- exhibit ---------- */
+  .exhibit{margin-bottom:84px}
+  .exhibit:last-child{margin-bottom:0}
+  .exhibit-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+  .roomno{
+    font-family:"Inter",system-ui,sans-serif;font-size:11px;letter-spacing:.2em;
+    text-transform:uppercase;color:#fff;background:var(--ink);
+    padding:4px 10px;border-radius:5px;
+  }
+  .flag{font-size:1.6rem;line-height:1}
+  .hero-img{
+    width:100%;border-radius:18px;border:1px solid var(--line);
+    box-shadow:var(--shadow);margin:22px 0 10px;display:block;
+    aspect-ratio:16/8;object-fit:cover;background:#efe7da;
+  }
+  figcaption{
+    font-family:"Inter",system-ui,sans-serif;font-size:12px;color:var(--muted);
+    margin-bottom:26px;
+  }
+  figure{margin:0}
+
+  .two{display:grid;grid-template-columns:1.15fr .85fr;gap:34px;align-items:start}
+  @media(max-width:860px){.two{grid-template-columns:1fr}}
+
+  /* tiles */
+  .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:14px}
+  .tile{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    overflow:hidden;box-shadow:var(--shadow);transition:.2s;
+  }
+  .tile.dim{opacity:.22;filter:saturate(.2)}
+  .tile img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:#efe7da}
+  .tile .body{padding:11px 13px 14px}
+  .tile h5{margin:0 0 3px;font-size:.95rem}
+  .tile p{
+    font-family:"Inter",system-ui,sans-serif;font-size:11.5px;line-height:1.5;
+    color:var(--muted);margin:6px 0 0;
+  }
+  .chip{
+    display:inline-block;font-family:"Inter",system-ui,sans-serif;font-size:10px;
+    font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+    color:#fff;padding:3px 8px;border-radius:999px;
+  }
+  .c-fruit{background:var(--fruit)} .c-veg{background:var(--veg)}
+  .c-grain{background:var(--grain)} .c-protein{background:var(--protein)}
+  .c-dairy{background:var(--dairy)}
+
+  /* plate breakdown card */
+  .breakdown{
+    background:var(--card);border:1px solid var(--line);border-radius:16px;
+    padding:22px;box-shadow:var(--shadow);position:sticky;top:78px;
+  }
+  @media(max-width:860px){.breakdown{position:static}}
+  .breakdown h4{
+    font-family:"Inter",system-ui,sans-serif;font-size:11px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--muted);margin:0 0 16px;
+  }
+  .bar{margin-bottom:14px}
+  .bar .lbl{
+    display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+    font-family:"Inter",system-ui,sans-serif;font-size:12.5px;margin-bottom:5px;
+  }
+  .bar .lbl b{font-weight:700}
+  .bar .lbl span{color:var(--muted);font-size:11.5px;text-align:right}
+  .track{height:8px;background:#f0e9dd;border-radius:99px;overflow:hidden}
+  .fill{height:100%;border-radius:99px}
+
+  .note{
+    margin-top:18px;padding:14px 16px;border-radius:12px;
+    background:#fff8ec;border:1px solid #f0dcbe;
+    font-family:"Inter",system-ui,sans-serif;font-size:12.5px;line-height:1.6;
+  }
+  .note b{display:block;margin-bottom:4px;letter-spacing:.04em;text-transform:uppercase;font-size:10.5px;color:#a97c31}
+  .note.spice{background:#f3f7ee;border-color:#d9e6ca}
+  .note.spice b{color:#5c7a3f}
+  .note.gap{background:#fdf0ef;border-color:#f3d4d1}
+  .note.gap b{color:#b1524c}
+
+  /* ---------- comparison table ---------- */
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:16px;background:#fff;box-shadow:var(--shadow)}
+  table{border-collapse:collapse;width:100%;min-width:680px;font-family:"Inter",system-ui,sans-serif;font-size:13px}
+  th,td{padding:14px 16px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  thead th{background:#f7f1e6;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  tbody tr:last-child td{border-bottom:none}
+  td:first-child{font-weight:700;white-space:nowrap}
+  .sw{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:7px;vertical-align:0}
+
+  /* ---------- takeaways ---------- */
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px;margin-top:26px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:var(--shadow)}
+  .card .num{
+    font-family:"Inter",system-ui,sans-serif;font-size:11px;letter-spacing:.16em;
+    color:var(--grain);font-weight:700;margin-bottom:8px;
+  }
+  .card p{font-family:"Inter",system-ui,sans-serif;font-size:13.5px;color:#4a4038;margin:0;line-height:1.65}
+
+  /* ---------- sources ---------- */
+  .srcgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:28px}
+  ol.src,ul.src{font-family:"Inter",system-ui,sans-serif;font-size:12.5px;color:var(--muted);line-height:1.75;padding-left:20px;margin:0}
+  ol.src a,ul.src a{color:#8a6a3a}
+  footer{padding:44px 0 64px;text-align:center;font-family:"Inter",system-ui,sans-serif;font-size:12px;color:var(--muted)}
+
+  @media print{
+    nav,.filters{display:none}
+    section{page-break-inside:avoid;border:none}
+    body{background:#fff}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <span class="brand">A Seat at Every Table</span>
+    <a href="#key">The Key</a>
+    <a href="#room1">Room I · Korea</a>
+    <a href="#room2">Room II · Nigeria</a>
+    <a href="#room3">Room III · Mexico</a>
+    <a href="#compare">Side by Side</a>
+    <a href="#takeaways">Takeaways</a>
+    <a href="#sources">Sources</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">A MyPlate Virtual Gallery</div>
+    <h1>A Seat at<br><em>Every Table</em></h1>
+    <p class="lede">
+      MyPlate was never meant to be an American menu — it is a set of proportions.
+      Walk through three rooms and watch the same five food groups reassemble
+      themselves in a Korean <i>bapsang</i>, a Nigerian Sunday plate, and a Mexican
+      <i>comida</i>. The ingredients change. The plate does not.
+    </p>
+    <p class="byline">Curated by <b>Tingting Du</b> &nbsp;·&nbsp; NUTR SCI 132, Fall 2026 &nbsp;·&nbsp; Participation Activity: MyPlate Virtual Gallery</p>
+  </div>
+</header>
+
+<!-- ===================== THE KEY ===================== -->
+<section id="key">
+  <div class="wrap">
+    <h2>The Key</h2>
+    <p class="sub">
+      Every photograph in this gallery is tagged with the MyPlate food group it belongs to.
+      Use the colored dots below to read the rooms — and remember that MyPlate asks
+      <i>how much</i> of the plate, not <i>which</i> cuisine.
+    </p>
+
+    <div class="plate-row">
+      <div>
+        <div class="plate" role="img" aria-label="MyPlate diagram: half the plate fruits and vegetables, half grains and protein, with a side of dairy">
+          <span class="s-veg">Vegetables</span>
+          <span class="s-fruit">Fruits</span>
+          <span class="s-grain">Grains</span>
+          <span class="s-protein">Protein</span>
+          <div class="cup">DAIRY</div>
+        </div>
+      </div>
+      <div>
+        <p><b>Make half your plate fruits and vegetables.</b> <b>Make half your grains whole grains.</b> <b>Vary your protein routine.</b> <b>Move to low-fat or fat-free dairy — or a fortified alternative.</b></p>
+        <p style="color:var(--muted);font-size:14.5px">
+          Notice what MyPlate never says: it never names a single dish, spice, or cooking method.
+          That silence is the point. A tortilla and a bowl of rice sit in the same orange wedge.
+          Black beans, egusi seeds, and tofu all sit in the purple one.
+        </p>
+      </div>
+    </div>
+
+    <div class="keygrid">
+      <div class="keycard">
+        <h4><span class="dot" style="background:var(--veg)"></span>Vegetables</h4>
+        <p>Dark green, red &amp; orange, beans/peas, starchy, and "other." Fermented and stewed vegetables count.</p>
+      </div>
+      <div class="keycard">
+        <h4><span class="dot" style="background:var(--fruit)"></span>Fruits</h4>
+        <p>Whole, cut, frozen, dried, or 100% juice. Tropical fruit counts just as much as an apple.</p>
+      </div>
+      <div class="keycard">
+        <h4><span class="dot" style="background:var(--grain)"></span>Grains</h4>
+        <p>Rice, maize, millet, sorghum, wheat, teff. At least half should be whole or minimally refined.</p>
+      </div>
+      <div class="keycard">
+        <h4><span class="dot" style="background:var(--protein)"></span>Protein Foods</h4>
+        <p>Seafood, poultry, meat, eggs, beans, peas, lentils, nuts, seeds, and soy products.</p>
+      </div>
+      <div class="keycard">
+        <h4><span class="dot" style="background:var(--dairy)"></span>Dairy</h4>
+        <p>Milk, yogurt, cheese, and lactose-free or fortified soy versions — important where lactose intolerance is common.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== EXHIBITS ===================== -->
+<section id="exhibits">
+  <div class="wrap">
+    <h2>The Exhibits</h2>
+    <p class="sub">
+      Three meals, photographed as they are actually served. Tap a food group below to
+      spotlight it across all three rooms and see the same nutritional job being done by
+      completely different ingredients.
+    </p>
+
+    <div class="filters" role="group" aria-label="Filter exhibits by MyPlate food group">
+      <button data-group="all" aria-pressed="true">Show all</button>
+      <button data-group="veg" aria-pressed="false">Vegetables</button>
+      <button data-group="fruit" aria-pressed="false">Fruits</button>
+      <button data-group="grain" aria-pressed="false">Grains</button>
+      <button data-group="protein" aria-pressed="false">Protein</button>
+      <button data-group="dairy" aria-pressed="false">Dairy</button>
+    </div>
+
+    <!-- ---------- ROOM I ---------- -->
+    <article class="exhibit" id="room1">
+      <div class="exhibit-head">
+        <span class="roomno">Room I</span>
+        <span class="flag">🇰🇷</span>
+        <h3 style="font-size:1.5rem;margin:0">Korea — the <i>bapsang</i>, a plate already divided</h3>
+      </div>
+      <p style="color:var(--muted);max-width:68ch">
+        A Korean table is built as <i>bap</i> (rice) + <i>guk</i> (soup) + <i>banchan</i> (many small
+        side dishes). The banchan system is, functionally, MyPlate's "half your plate"
+        rule enforced by tradition: nobody eats rice alone.
+      </p>
+
+      <figure>
+        <img class="hero-img" loading="lazy"
+             src="images/hero-bibimbap.jpg"
+             alt="Dolsot bibimbap: rice in a hot stone bowl topped with seasoned vegetables, beef and an egg">
+        <figcaption><b>Dolsot bibimbap</b> — rice under a mosaic of seasoned vegetables (<i>namul</i>), beef, and an egg. One bowl, four food groups. <i>Photo: Wikimedia Commons, CC BY-SA.</i></figcaption>
+      </figure>
+
+      <div class="two">
+        <div class="tiles">
+          <div class="tile" data-group="grain">
+            <img loading="lazy" src="images/rice.jpg" alt="Bowl of freshly steamed short-grain rice">
+            <div class="body">
+              <span class="chip c-grain">Grains</span>
+              <h5 style="margin-top:8px">Bap (steamed rice)</h5>
+              <p>Swap white short-grain for <i>japgokbap</i> — rice cooked with barley, black rice, and beans — to move this wedge toward whole grains.</p>
+            </div>
+          </div>
+          <div class="tile" data-group="veg">
+            <img loading="lazy" src="images/banchan.jpg" alt="An assortment of Korean banchan side dishes">
+            <div class="body">
+              <span class="chip c-veg">Vegetables</span>
+              <h5 style="margin-top:8px">Banchan (side dishes)</h5>
+              <p>Spinach, bellflower root, bean sprouts, seaweed, radish. Five to eight vegetables in a single sitting — blanched or lightly seasoned, rarely fried.</p>
+            </div>
+          </div>
+          <div class="tile" data-group="veg">
+            <img loading="lazy" src="images/kimchi.jpg" alt="Several varieties of kimchi">
+            <div class="body">
+              <span class="chip c-veg">Vegetables</span>
+              <h5 style="margin-top:8px">Kimchi</h5>
+              <p>Fermented napa cabbage and radish. Counts fully as a vegetable and adds live cultures — but it is the single biggest sodium source on the table.</p>
+            </div>
+          </div>
+          <div class="tile" data-group="protein">
+            <img loading="lazy" src="images/tofu.jpg" alt="Block of silken tofu">
+            <div class="body">
+              <span class="chip c-protein">Protein</span>
+              <h5 style="margin-top:8px">Dubu (tofu) &amp; egg</h5>
+              <p>Soy is the everyday protein; beef or mackerel appear in smaller amounts. MyPlate's "vary your protein routine" is the default here, not an effort.</p>
+            </div>
+          </div>
+          <div class="tile" data-group="protein">
+            <img loading="lazy" src="images/doenjang-jjigae.jpg" alt="Doenjang jjigae, Korean soybean paste stew">
+            <div class="body">
+              <span class="chip c-protein">Protein</span>
+              <h5 style="margin-top:8px">Doenjang-jjigae</h5>
+              <p>Fermented soybean paste stew with zucchini, onion, and tofu — a protein and a vegetable in the same pot.</p>
+            </div>
+          </div>
+        </div>
+
+        <aside class="breakdown">
+          <h4>How this meal fills MyPlate</h4>
+          <div class="bar"><div class="lbl"><b>Vegetables</b><span>namul, kimchi, jjigae veg</span></div><div class="track"><div class="fill" style="width:38%;background:var(--veg)"></div></div></div>
+          <div class="bar"><div class="lbl"><b>Grains</b><span>rice / multigrain rice</span></div><div class="track"><div class="fill" style="width:32%;background:var(--grain)"></div></div></div>
+          <div class="bar"><div class="lbl"><b>Protein</b><span>tofu, egg, beef, fish</span></div><div class="track"><div class="fill" style="width:22%;background:var(--protein)"></div></div></div>
+          <div class="bar"><div class="lbl"><b>Fruits</b><span>sliced pear / persimmon after</span></div><div class="track"><div class="fill" style="width:8%;background:var(--fruit)"></div></div></div>
+          <div class="bar"><div class="lbl"><b>Dairy</b><span>rare in tradition</span></div><div class="track"><div class="fill" style="width:3%;background:var(--dairy)"></div></div></div>
+
+          <div class="note spice">
+            <b>Flavor without salt shakers</b>
+            Gochugaru (chili flake), toasted sesame oil and seeds, garlic, ginger, scallion. Aromatics do the heavy lifting — which is exactly the swap MyPlate recommends for cutting added salt and fat.
+          </div>
+          <div class="note gap">
+            <b>Where MyPlate pushes back</b>
+            Sodium (kimchi, jang pastes, soy sauce) and low dairy/calcium. Cultural fix that keeps the food intact: rinse or use less kimchi brine, add sesame seeds, anchovies, and leafy greens for calcium, or serve fortified soy milk.
+          </div>
+          <div class="note">
+            <b>Fruit is dessert here</b>
+            Korean meals close with fresh fruit — Asian pear, persimmon, tangerine — instead of a sweet course. Serving fruit as dessert is a direct MyPlate win.
+          </div>
+        </aside>
+      </div>
+    </article>
+
+    <!-- ---------- ROOM II ---------- -->
+    <article class="exhibit" id="room2">
+      <div class="exhibit-head">
+        <span class="roomno">Room II</span>
+        <span class="flag">🇳🇬</span>
+        <h3 style="font-size:1.5rem;margin:0">Nigeria &amp; West Africa — rice, stew, and a pot of greens</h3>
+      </div>
+      <p style="color:var(--muted);max-width:68ch">
+        The West African plate is built around a starch and a soup or stew poured over it.
+        The stew is where the vegetables and protein hide — which means this cuisine can
+        look grain-heavy in a photo while being remarkably well balanced on the fork.
+      </p>
+
+      <figure>
+        <img class="hero-img" loading="lazy"
+             src="images/hero-jollof-rice.jpg"
+             alt="Jollof rice served with stew">
+        <figcaption><b>Jollof rice with stew</b> — rice simmered in a base of tomato, red pepper, and onion, so the vegetables are cooked into the grain itself. <i>Photo: Wikimedia Commons, CC BY-SA.</i></figcaption>
+      </figure>
+
+      <div class="two">
+        <div class="tiles">
+          <div class="tile" data-group="grain">
+            <img loading="lazy" src="images/jollof-rice.jpg" alt="Plate of jollof rice">
+            <div class="body">
+              <span class="chip c-grain">Grains</span>
+              <h5 style="margin-top:8px">Jollof rice</h5>
+              <p>Long-grain rice cooked in pureed tomato and pepper. Ofada (unpolished) rice, millet, sorghum, or fonio move this toward whole grains.</p>
+            </div>
+          </div>
+          <div class="tile" data-group="protein">
+            <img loading="lazy" src="images/egusi.jpg" alt="Egusi melon seeds used in West African cooking">
+            <div class="body">
+              <span class="chip c-protein">Protein</span>
+              <h5 style="margin-top:8px">Egusi (melon seeds)</h5>
+              <p>Ground melon seeds thicken soup and carry plant protein, healthy fat, and magnesium. A seed doing the work of a sauce.</p>
+            </div>
+          </div>
+          <div class="tile" data-group="veg">
+            <img loading="lazy" src="images/ugu-greens.jpg" alt="Ugu, the fluted pumpkin leaf used as a leafy green in Nigerian soups">
+            <div class="body">
+              <span class="chip c-veg">Vegetables</span>
+              <h5 style="margin-top:8px">Efo riro / ugu greens</h5>
+              <p>Egusi soup is cooked with fistfuls of bitterleaf, ugu (pumpkin leaf), or spinach — a dark-green vegetable serving folded into the protein dish.</p>
+            </div>
+          </div>
+          <div class="tile" data-group="protein">
+            <img loading="lazy" src="images/moin-moin.jpg" alt="Moin moin, Nigerian steamed bean pudding">
+            <div class="body">
+              <span class="chip c-protein">Protein</span>
+              <h5 style="margin-top:8px">Moin-moin (bean pudding)</h5>
+              <p>Steamed, peeled black-eyed peas with pepper, onion, and sometimes fish or egg. Steamed — not fried — so it is a lean protein <i>and</i> counts toward beans.</p>
+            </div>
+          </div>
+          <div class="tile" data-group="fruit">
+            <img loading="lazy" src="images/plantain.jpg" alt="Plantains for sale at a West African market">
+            <div class="body">
+              <span class="chip c-fruit">Fruits</span>
+              <h5 style="margin-top:8px">Plantain (dodo)</h5>
+              <p>Botanically a fruit, nutritionally a starchy staple. Roasted (<i>boli</i>) or air-fried instead of deep-fried, it stays a fruit serving instead of a fat serving.</p>
+            </div>
+          </div>
+          <div class="tile" data-group="dairy">
+            <img loading="lazy" src="images/fura-da-nono.jpg" alt="Fura da nono, millet balls served in fermented cow's milk">
+            <div class="body">
+              <span class="chip c-dairy">Dairy</span>
+              <h5 style="margin-top:8px">Fura da nono</h5>
+              <p>Hausa millet balls in fermented cow's milk — a traditional dairy + grain drink. Fermentation lowers lactose, which matters in a region with high lactose intolerance.</p>
+            </div>
+          </div>
+        </div>
+
+        <aside class="breakdown">
+          <h4>How this meal fills MyPlate</h4>
+          <div class="bar"><div class="lbl"><b>Grains</b><span>jollof, fufu, ofada rice</span></div><div class="track"><div class="fill" style="width:40%;background:var(--grain)"></div></div></div>
+          <div class="bar"><div class="lbl"><b>Protein</b><span>egusi, beans, fish, chicken</span></div><div class="track"><div class="fill" style="width:26%;background:var(--protein)"></div></div></div>
+          <div class="bar"><div class="lbl"><b>Vegetables</b><span>tomato/pepper base, ugu, okra</span></div><div class="track"><div class="fill" style="width:24%;background:var(--veg)"></div></div></div>
+          <div class="bar"><div class="lbl"><b>Fruits</b><span>plantain, mango, pawpaw</span></div><div class="track"><div class="fill" style="width:16%;background:var(--fruit)"></div></div></div>
+          <div class="bar"><div class="lbl"><b>Dairy</b><span>nono, fura da nono</span></div><div class="track"><div class="fill" style="width:8%;background:var(--dairy)"></div></div></div>
+
+          <div class="note spice">
+            <b>Flavor without salt shakers</b>
+            Scotch bonnet, uda and ehuru seeds, crayfish powder, ginger, garlic, thyme, curry leaf, locust bean (iru). Deep savory flavor built from aromatics rather than bouillon cubes.
+          </div>
+          <div class="note gap">
+            <b>Where MyPlate pushes back</b>
+            Palm-oil volume, deep frying, and seasoning cubes (sodium). Cultural fix: keep the red palm oil for color and vitamin A but measure it, roast plantain instead of frying, and build the base from fresh pepper puree instead of cubes.
+          </div>
+          <div class="note">
+            <b>The stew is the vegetable</b>
+            Judging this plate by the photo undercounts it. The blended tomato-pepper-onion base and the greens in the soup are real vegetable servings — a reminder that MyPlate has to be applied to the <i>recipe</i>, not the silhouette.
+          </div>
+        </aside>
+      </div>
+    </article>
+
+    <!-- ---------- ROOM III ---------- -->
+    <article class="exhibit" id="room3">
+      <div class="exhibit-head">
+        <span class="roomno">Room III</span>
+        <span class="flag">🇲🇽</span>
+        <h3 style="font-size:1.5rem;margin:0">Mexico — maize, beans, and the oldest complete protein in the Americas</h3>
+      </div>
+      <p style="color:var(--muted);max-width:68ch">
+        Corn and beans eaten together supply a complete amino acid profile, and
+        nixtamalized corn releases niacin and calcium that raw maize locks away. The
+        traditional Mexican plate solved a nutrition problem several thousand years before
+        anyone drew a food guide.
+      </p>
+
+      <figure>
+        <img class="hero-img" loading="lazy"
+             src="images/hero-tacos.jpg"
+             alt="Assorted tacos on corn tortillas with onion and cilantro">
+        <figcaption><b>Tacos on corn tortillas</b> — a hand-held portion-control device: one grain, one protein, one pile of raw vegetables. <i>Photo: Wikimedia Commons, CC BY-SA.</i></figcaption>
+      </figure>
+
+      <div class="two">
+        <div class="tiles">
+          <div class="tile" data-group="grain">
+            <img loading="lazy" src="images/tortillas.jpg" alt="Stack of corn tortillas">
+            <div class="body">
+              <span class="chip c-grain">Grains</span>
+              <h5 style="margin-top:8px">Corn tortilla</h5>
+              <p>Nixtamalized whole maize — a whole grain with bonus calcium and bioavailable niacin. Choose corn over flour tortillas to keep the whole-grain half of the wedge.</p>
+            </div>
+          </div>
+          <div class="tile" data-group="protein">
+            <img loading="lazy" src="images/frijoles.jpg" alt="A serving of Mexican beans">
+            <div class="body">
+              <span class="chip c-protein">Protein</span>
+              <h5 style="margin-top:8px">Frijoles &amp; carne asada</h5>
+              <p>Black or pinto beans are the everyday protein; grilled meat or fish is the accent. Beans de la olla (simmered, not refried in lard) keep it lean.</p>
+            </div>
+          </div>
+          <div class="tile" data-group="veg">
+            <img loading="lazy" src="images/pico-de-gallo.jpg" alt="Bowl of pico de gallo salsa">
+            <div class="body">
+              <span class="chip c-veg">Vegetables</span>
+              <h5 style="margin-top:8px">Pico de gallo</h5>
+              <p>Raw tomato, onion, chile, cilantro, lime. A condiment that is literally a serving of vegetables — and the vitamin C helps absorb iron from the beans.</p>
+            </div>
+          </div>
+          <div class="tile" data-group="veg">
+            <img loading="lazy" src="images/nopales.jpg" alt="Prickly pear cactus pads and fruit">
+            <div class="body">
+              <span class="chip c-veg">Vegetables</span>
+              <h5 style="margin-top:8px">Nopales</h5>
+              <p>Grilled cactus paddles — high in soluble fiber, very low calorie, and studied for blood-sugar effects. An indigenous vegetable with no European substitute.</p>
+            </div>
+          </div>
+          <div class="tile" data-group="fruit">
+            <img loading="lazy" src="images/mango.jpg" alt="Whole and halved mangoes">
+            <div class="body">
+              <span class="chip c-fruit">Fruits</span>
+              <h5 style="margin-top:8px">Mango con chile y limón</h5>
+              <p>Street fruit cups — mango, jicama, cucumber, watermelon with lime and chili powder. Proof that "eat more fruit" does not have to mean an apple.</p>
+            </div>
+          </div>
+          <div class="tile" data-group="dairy">
+            <img loading="lazy" src="images/queso.png" alt="Oaxaca cheese, a white stringy Mexican cheese">
+            <div class="body">
+              <span class="chip c-dairy">Dairy</span>
+              <h5 style="margin-top:8px">Queso Oaxaca / fresco</h5>
+              <p>Naturally lower-fat fresh cheeses, crumbled rather than melted in quantity. Used as a garnish, so a little supplies calcium without much saturated fat.</p>
+            </div>
+          </div>
+        </div>
+
+        <aside class="breakdown">
+          <h4>How this meal fills MyPlate</h4>
+          <div class="bar"><div class="lbl"><b>Vegetables</b><span>salsa, nopales, cabbage, calabacita</span></div><div class="track"><div class="fill" style="width:32%;background:var(--veg)"></div></div></div>
+          <div class="bar"><div class="lbl"><b>Grains</b><span>corn tortilla, rice</span></div><div class="track"><div class="fill" style="width:30%;background:var(--grain)"></div></div></div>
+          <div class="bar"><div class="lbl"><b>Protein</b><span>beans, fish, chicken, eggs</span></div><div class="track"><div class="fill" style="width:26%;background:var(--protein)"></div></div></div>
+          <div class="bar"><div class="lbl"><b>Fruits</b><span>mango, papaya, guava, agua fresca</span></div><div class="track"><div class="fill" style="width:20%;background:var(--fruit)"></div></div></div>
+          <div class="bar"><div class="lbl"><b>Dairy</b><span>queso fresco, crema</span></div><div class="track"><div class="fill" style="width:12%;background:var(--dairy)"></div></div></div>
+
+          <div class="note spice">
+            <b>Flavor without salt shakers</b>
+            Toasted guajillo, ancho and chipotle chiles, cumin, Mexican oregano, epazote, cilantro, lime, charred onion and garlic. Dry-toasting chiles builds depth with zero added sodium.
+          </div>
+          <div class="note gap">
+            <b>Where MyPlate pushes back</b>
+            Frying, lard, large crema portions, and sugary aguas frescas. Cultural fix: beans de la olla instead of refritos, grill instead of fry, and make agua fresca with fruit and water and roughly half the sugar.
+          </div>
+          <div class="note">
+            <b>Corn + beans = complete protein</b>
+            Maize is low in lysine; beans are low in methionine. Eaten in the same day they complement each other perfectly — the reason this pairing anchors MyPlate's protein wedge without meat.
+          </div>
+        </aside>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ===================== COMPARISON ===================== -->
+<section id="compare">
+  <div class="wrap">
+    <h2>Side by Side</h2>
+    <p class="sub">The same five jobs, three different casts.</p>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>MyPlate group</th><th>🇰🇷 Korea</th><th>🇳🇬 Nigeria / West Africa</th><th>🇲🇽 Mexico</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="sw" style="background:var(--veg)"></span>Vegetables</td>
+            <td>Namul banchan, kimchi, seaweed, radish</td>
+            <td>Ugu &amp; bitterleaf, okra, tomato-pepper-onion base</td>
+            <td>Nopales, pico de gallo, calabacita, cabbage</td>
+          </tr>
+          <tr>
+            <td><span class="sw" style="background:var(--fruit)"></span>Fruits</td>
+            <td>Asian pear, persimmon, tangerine (served as dessert)</td>
+            <td>Plantain, mango, pawpaw, African star apple</td>
+            <td>Mango, guava, papaya, jicama, agua fresca</td>
+          </tr>
+          <tr>
+            <td><span class="sw" style="background:var(--grain)"></span>Grains</td>
+            <td>Bap; <i>japgokbap</i> with barley &amp; black rice</td>
+            <td>Jollof rice, ofada rice, fufu, millet, sorghum, fonio</td>
+            <td>Nixtamalized corn tortilla, arroz</td>
+          </tr>
+          <tr>
+            <td><span class="sw" style="background:var(--protein)"></span>Protein</td>
+            <td>Tofu, egg, mackerel, small portions of beef</td>
+            <td>Egusi seeds, black-eyed peas, tilapia, goat, chicken</td>
+            <td>Black/pinto beans, fish, eggs, grilled meats</td>
+          </tr>
+          <tr>
+            <td><span class="sw" style="background:var(--dairy)"></span>Dairy</td>
+            <td><b>Traditionally sparse</b> — use fortified soy milk, sesame, anchovies, greens for calcium</td>
+            <td>Nono / fura da nono (fermented milk); otherwise limited</td>
+            <td>Queso fresco, Oaxaca, crema; leche in atole</td>
+          </tr>
+          <tr>
+            <td>Watch-outs</td>
+            <td>Sodium from kimchi, soy sauce, jang</td>
+            <td>Palm oil, deep frying, seasoning cubes</td>
+            <td>Lard, frying, sugary drinks</td>
+          </tr>
+          <tr>
+            <td>Built-in strengths</td>
+            <td>Vegetable variety, fermentation, plant protein, fruit as dessert</td>
+            <td>Legumes and seeds as protein, dark leafy greens, one-pot vegetables</td>
+            <td>Whole-grain maize, legume + grain complementarity, raw salsas</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TAKEAWAYS ===================== -->
+<section id="takeaways">
+  <div class="wrap">
+    <h2>What the Gallery Shows</h2>
+    <p class="sub">Four findings from mapping three cuisines onto one framework.</p>
+    <div class="cards">
+      <div class="card">
+        <div class="num">FINDING 01</div>
+        <p><b>MyPlate is a ratio, not a recipe.</b> Every cuisine here already fills all five wedges. Nothing had to be removed or "Americanized" — only re-labeled. A dietitian who insists on a chicken breast and a side salad is adding a cultural requirement that MyPlate itself never made.</p>
+      </div>
+      <div class="card">
+        <div class="num">FINDING 02</div>
+        <p><b>The dairy circle is the weak point.</b> Roughly two-thirds of the world's adults have some lactose malabsorption, and Korean and West African traditional diets barely use fluid milk. Counseling that leads with "drink more milk" fails here; fortified soy milk, fermented nono, small cheeses, greens, sesame, and bone-in fish are the culturally valid routes to calcium.</p>
+      </div>
+      <div class="card">
+        <div class="num">FINDING 03</div>
+        <p><b>Mixed dishes get undercounted.</b> A photo of jollof rice or bibimbap looks like "a bowl of rice." The vegetables and protein are cooked <i>into</i> the dish. Any assessment tool built on separate-components thinking will systematically underestimate the diet quality of cuisines that cook in one pot.</p>
+      </div>
+      <div class="card">
+        <div class="num">FINDING 04</div>
+        <p><b>Change the technique, not the dish.</b> The real risks — frying, palm oil and lard volume, sodium from bouillon and jang, sugary drinks — are all <i>preparation</i> problems. Roasting plantain instead of frying it, or simmering beans instead of refrying them, protects the culture and moves the nutrition. Telling someone to stop eating jollof rice does neither.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== SOURCES ===================== -->
+<section id="sources">
+  <div class="wrap">
+    <h2>Sources &amp; Image Credits</h2>
+    <div class="srcgrid">
+      <div>
+        <h3 style="font-size:.95rem;font-family:Inter,system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">References</h3>
+        <ol class="src">
+          <li>U.S. Department of Agriculture. <i>MyPlate</i>. <a href="https://www.myplate.gov">myplate.gov</a></li>
+          <li>USDA &amp; HHS. <i>Dietary Guidelines for Americans, 2020–2025</i> — "Customizing the Dietary Guidelines Framework." <a href="https://www.dietaryguidelines.gov">dietaryguidelines.gov</a></li>
+          <li>Nutrition.gov. <i>Culture and Food</i>. <a href="https://www.nutrition.gov/topics/shopping-cooking-and-meal-planning/culture-and-food">nutrition.gov</a></li>
+          <li>Oldways. <i>Traditional Diets — Asian, African Heritage &amp; Latin American Heritage Diet Pyramids</i>. <a href="https://oldwayspt.org">oldwayspt.org</a></li>
+          <li>USDA National Agricultural Library. <i>Cultural and Traditional Foods</i>. <a href="https://www.nal.usda.gov/legacy/fnic/cultural-and-traditional-foods">nal.usda.gov</a></li>
+          <li>Food and Agriculture Organization. <i>Food-based Dietary Guidelines</i> (Nigeria, Republic of Korea, Mexico). <a href="https://www.fao.org/nutrition/education/food-dietary-guidelines">fao.org</a></li>
+          <li>Cook Smarts. <i>The Ultimate Guide to Spices</i>; <i>Guide to Aromatics</i>. <a href="https://www.cooksmarts.com">cooksmarts.com</a></li>
+          <li>Virginia Family Nutrition Program. <i>MyPlate Inspired Dishes from Around the World</i>. <a href="https://eatsmartmovemoreva.org">eatsmartmovemoreva.org</a></li>
+        </ol>
+      </div>
+      <div>
+        <h3 style="font-size:.95rem;font-family:Inter,system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Photographs</h3>
+        <ul class="src">
+          <li>All photographs are freely licensed images hosted on <a href="https://commons.wikimedia.org">Wikimedia Commons</a> (CC BY / CC BY-SA / public domain).</li>
+          <li><b>Room I:</b> <i>Dolsot-bibimbap</i>, <i>Meshi (cooked rice)</i>, <i>Banchan</i>, <i>Various kimchi</i>, <i>Doenjang-jjigae</i>, <i>Japanese silken tofu</i></li>
+          <li><b>Room II:</b> <i>Jollof Rice with Stew</i>, <i>Egusi</i>, <i>Telfairia occidentalis (ugu)</i>, <i>Moin-Moin</i>, <i>Vendeuses de bananes plantain</i>, <i>Fura da nono</i></li>
+          <li><b>Room III:</b> <i>Tacos de carnitas, carne asada y al pastor</i>, <i>Mexican tortilla</i>, <i>Frijoles</i>, <i>Pico de Gallo</i>, <i>Prickly Pear</i>, <i>Quesillo de Oaxaca</i>, <i>Mangos — single and halved</i></li>
+          <li>Each file name above can be searched on Wikimedia Commons to view the individual photographer and license terms.</li>
+          <li>Copies are served from this site's <code>images/</code> folder so the gallery displays reliably; all remain under their original CC BY / CC BY-SA / public-domain terms.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    Built as a participation activity for NUTR SCI 132: Nutrition Today · Fall 2026 · University of Wisconsin–Madison<br>
+    Curated by Tingting Du<br>
+    "A Seat at Every Table" — MyPlate &amp; Cultural Cuisine Virtual Gallery
+  </div>
+</footer>
+
+<script>
+  const buttons = document.querySelectorAll('.filters button');
+  const tiles = document.querySelectorAll('.tile');
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const group = btn.dataset.group;
+      buttons.forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+      tiles.forEach(t => {
+        const match = group === 'all' || t.dataset.group === group;
+        t.classList.toggle('dim', !match);
+      });
+    });
+  });
+</script>
+</body>
+</html>

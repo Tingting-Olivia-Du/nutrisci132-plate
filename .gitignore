@@ -1,0 +1,9 @@
+# secrets — never commit
+.env
+.env.*
+
+# local working files, not part of the published site
+SUBMIT_THIS.md
+localize_images.py
+*.bak
+.DS_Store
