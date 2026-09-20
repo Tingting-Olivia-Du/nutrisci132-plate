@@ -2,7 +2,7 @@
 
 **Tingting Du** · NUTR SCI 132: Nutrition Today · Fall 2026 · University of Wisconsin–Madison
 
-**Live gallery → https://tingting-olivia-du.github.io/nutri-sci-132/**
+**Live gallery → https://tingting-olivia-du.github.io/nutrisci132-plate/**
 
 A virtual gallery built as a participation activity for NUTR SCI 132. It is organized as three
 exhibit rooms, each taking one cultural cuisine and mapping a traditional meal onto the five
